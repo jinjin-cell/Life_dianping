@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMD 数据库 ER 图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .diagram-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .legend {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px 30px;
+        }
+        .legend h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #1a1a2e;
+            border-bottom: 2px solid #e8e8e8;
+            padding-bottom: 8px;
+        }
+        .legend table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .legend th {
+            background: #f7f8fa;
+            text-align: left;
+            padding: 10px 12px;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e8e8e8;
+        }
+        .legend td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .legend tr:hover td {
+            background: #fafbfc;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .tag-pk { background: #fff3cd; color: #856404; }
+        .tag-fk { background: #d1ecf1; color: #0c5460; }
+        .tag-uk { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 HMD 数据库 ER 图</h1>
+        <p class="subtitle">大众点评项目 — 共 11 张表 | 生成时间: <span id="genTime"></span></p>
+
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+erDiagram
+    tb_user ||--|| tb_user_info : "1:1 用户资料"
+    tb_user ||--o{ tb_blog : "1:N 发表探店笔记"
+    tb_user ||--o{ tb_blog_comments : "1:N 发表评论"
+    tb_user ||--o{ tb_follow : "1:N 关注他人"
+    tb_user ||--o{ tb_follow : "1:N 被他人关注"
+    tb_user ||--o{ tb_voucher_order : "1:N 下单购买"
+    tb_user ||--o{ tb_sign : "1:N 每日签到"
+
+    tb_shop_type ||--o{ tb_shop : "1:N 分类"
+    tb_shop ||--o{ tb_blog : "1:N 探店"
+    tb_shop ||--o{ tb_voucher : "1:N 发放优惠券"
+
+    tb_blog ||--o{ tb_blog_comments : "1:N 评论"
+    tb_blog_comments ||--o{ tb_blog_comments : "嵌套回复"
+
+    tb_voucher ||--o| tb_seckill_voucher : "1:1 秒杀扩展"
+    tb_voucher ||--o{ tb_voucher_order : "1:N 购买"
+
+    tb_user {
+        bigint id PK "🔑 主键 自增"
+        varchar phone UK "📱 手机号码"
+        varchar password "🔒 密码 加密"
+        varchar nick_name "👤 昵称"
+        varchar icon "🖼 头像URL"
+        timestamp create_time "创建时间"
+        timestamp update_time "更新时间"
+    }
+
+    tb_user_info {
+        bigint user_id PK "🔑 用户ID"
+        varchar city "🏙 城市"
+        varchar introduce "📝 个人介绍"
+        int fans "👥 粉丝数"
+        int followee "👤 关注数"
+        tinyint gender "⚥ 0男1女"
+        date birthday "🎂 生日"
+        int credits "⭐ 积分"
+        tinyint level "💎 会员级别0~9"
+        timestamp create_time "创建时间"
+        timestamp update_time "更新时间"
+    }
+
+    tb_shop_type {
+        bigint id PK "🔑 主键"
+        varchar name "📂 类型名称"
+        varchar icon "🖼 图标URL"
+        int sort "↕ 排序"
+        timestamp create_time ""
+        timestamp update_time ""
+    }
+
+    tb_shop {
+        bigint id PK "🔑 主键"
+        bigint type_id FK "商铺类型"
+        varchar name "🏪 商铺名称"
+        varchar images "🖼 图片集"
+        varchar area "📍 商圈"
+        varchar address "📍 地址"
+        double x "经度"
+        double y "纬度"
+        bigint avg_price "💰 均价"
+        int sold "销量"
+        int comments "评论数"
+        int score "⭐ 评分×10"
+        varchar open_hours "🕐 营业时间"
+        timestamp create_time ""
+        timestamp update_time ""
+    }
+
+    tb_blog {
+        bigint id PK "🔑 主键"
+        bigint shop_id FK "商铺ID"
+        bigint user_id FK "用户ID"
+        varchar title "📝 标题"
+        varchar images "🖼 照片≤9张"
+        varchar content "📄 探店描述"
+        int liked "❤ 点赞数"
+        int comments "💬 评论数"
+        timestamp create_time ""
+        timestamp update_time ""
+    }
+
+    tb_blog_comments {
+        bigint id PK "🔑 主键"
+        bigint user_id FK "用户ID"
+        bigint blog_id FK "探店ID"
+        bigint parent_id "父评论ID"
+        bigint answer_id "回复目标ID"
+        varchar content "💬 内容"
+        int liked "❤ 点赞"
+        tinyint status "状态"
+        timestamp create_time ""
+        timestamp update_time ""
+    }
+
+    tb_follow {
+        bigint id PK "🔑 主键"
+        bigint user_id FK "用户ID"
+        bigint follow_user_id FK "关注用户ID"
+        timestamp create_time "关注时间"
+    }
+
+    tb_voucher {
+        bigint id PK "🔑 主键"
+        bigint shop_id FK "商铺ID"
+        varchar title "🎫 标题"
+        varchar sub_title "副标题"
+        varchar rules "📋 使用规则"
+        bigint pay_value "💰 支付金额分"
+        bigint actual_value "💵 抵扣金额分"
+        tinyint type "0普通1秒杀"
+        tinyint status "1上架2下架3过期"
+        timestamp create_time ""
+        timestamp update_time ""
+    }
+
+    tb_seckill_voucher {
+        bigint voucher_id PK "🔑 优惠券ID"
+        int stock "📦 库存"
+        timestamp begin_time "⏰ 开始时间"
+        timestamp end_time "⏰ 结束时间"
+        timestamp create_time ""
+        timestamp update_time ""
+    }
+
+    tb_voucher_order {
+        bigint id PK "🔑 雪花ID"
+        bigint user_id FK "用户ID"
+        bigint voucher_id FK "券ID"
+        tinyint pay_type "💳 支付方式"
+        tinyint status "📌 订单状态"
+        timestamp create_time "下单时间"
+        timestamp pay_time "支付时间"
+        timestamp use_time "核销时间"
+        timestamp refund_time "退款时间"
+        timestamp update_time ""
+    }
+
+    tb_sign {
+        bigint id PK "🔑 主键"
+        bigint user_id FK "用户ID"
+        year year "年份"
+        tinyint month "月份"
+        date date "签到日期"
+        tinyint is_backup "补签标志"
+    }
+            </div>
+        </div>
+
+        <div class="legend">
+            <h2>📋 业务关系明细</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>源表</th>
+                        <th>目标表</th>
+                        <th>基数</th>
+                        <th>关联字段</th>
+                        <th>业务含义</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_user_info</td>
+                        <td><span class="tag tag-pk">1:1</span></td>
+                        <td>id = user_id</td>
+                        <td>用户账号 → 用户详细资料</td>
+                    </tr>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_blog</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → user_id</td>
+                        <td>用户发表探店笔记</td>
+                    </tr>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_blog_comments</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → user_id</td>
+                        <td>用户发表评论</td>
+                    </tr>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_follow</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → user_id</td>
+                        <td>用户关注其他用户</td>
+                    </tr>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_follow</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → follow_user_id</td>
+                        <td>用户被其他用户关注</td>
+                    </tr>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_voucher_order</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → user_id</td>
+                        <td>用户购买优惠券</td>
+                    </tr>
+                    <tr>
+                        <td>tb_user</td>
+                        <td>tb_sign</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → user_id</td>
+                        <td>用户每日签到</td>
+                    </tr>
+                    <tr>
+                        <td>tb_shop_type</td>
+                        <td>tb_shop</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → type_id</td>
+                        <td>商铺分类</td>
+                    </tr>
+                    <tr>
+                        <td>tb_shop</td>
+                        <td>tb_blog</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → shop_id</td>
+                        <td>商铺被探店</td>
+                    </tr>
+                    <tr>
+                        <td>tb_shop</td>
+                        <td>tb_voucher</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → shop_id</td>
+                        <td>商铺发优惠券</td>
+                    </tr>
+                    <tr>
+                        <td>tb_blog</td>
+                        <td>tb_blog_comments</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → blog_id</td>
+                        <td>笔记下的评论</td>
+                    </tr>
+                    <tr>
+                        <td>tb_blog_comments</td>
+                        <td>tb_blog_comments</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → parent_id</td>
+                        <td>评论嵌套回复</td>
+                    </tr>
+                    <tr>
+                        <td>tb_voucher</td>
+                        <td>tb_seckill_voucher</td>
+                        <td><span class="tag tag-pk">1:1</span></td>
+                        <td>id = voucher_id</td>
+                        <td>秒杀券扩展属性</td>
+                    </tr>
+                    <tr>
+                        <td>tb_voucher</td>
+                        <td>tb_voucher_order</td>
+                        <td><span class="tag tag-fk">1:N</span></td>
+                        <td>id → voucher_id</td>
+                        <td>优惠券被购买</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('genTime').textContent = new Date().toLocaleString('zh-CN');
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            er: {
+                diagramPadding: 30,
+                layoutDirection: 'TB',
+                entityPadding: 20,
+                fontSize: 13
+            },
+            themeVariables: {
+                primaryColor: '#e3f2fd',
+                primaryTextColor: '#1565c0',
+                primaryBorderColor: '#1976d2',
+                lineColor: '#546e7a',
+                secondaryColor: '#fff3e0',
+                tertiaryColor: '#f3e5f5'
+            }
+        });
+    </script>
+</body>
+</html>
